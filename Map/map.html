@@ -308,6 +308,9 @@
             marker = markers[i];
             var typeString = marker.getIcon();
             typeString = typeString.substring(10, typeString.length - 4);
+            if (typeString === "satan") {
+                typeString = "other";
+            }
             if (typeString === category || category === "all") {
                 marker.setVisible(true);
             } else {

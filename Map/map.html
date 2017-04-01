@@ -9,7 +9,7 @@
         }
         /* Optional: Makes the sample page fill the window. */
         html, body {
-            height: 95%;
+            height: 100%;
             margin: 0;
             padding: 0;
         }
@@ -17,15 +17,6 @@
 </head>
 <body>
 <div id="map"></div>
-
-<select id="type" onchange="filterMarkers(this.value);">
-    <option value="all">Please select category</option>
-    <option value="soccer">soccer</option>
-    <option value="basketball">basketball</option>
-    <option value="football">football</option>
-    <option value="frisbee">frisbee</option>
-    <option value="other">other</option>
-</select>
 
 <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
 <script>
@@ -48,6 +39,7 @@
     markers = [];
 
     var activityList = ["soccer", "basketball", "football", "frisbee"];
+    var infowindow;
 
     /**
      * Starting point for running the program. Authenticates the user.
@@ -64,6 +56,44 @@
         }, {remember: 'sessionOnly'});  // Users will get a new id for every session.
     }
 
+    function CenterControl(controlDiv, map) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to recenter the map';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '16px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = "<select id=\"type\" onchange=\"filterMarkers(this.value);\">"
+            + "<option value=\"all\">Please select category</option>"
+            + "<option value=\"soccer\">soccer</option>"
+            + "<option value=\"basketball\">basketball</option>"
+            + "<option value=\"football\">football</option>"
+            + "<option value=\"frisbee\">frisbee</option>"
+            + "<option value=\"other\">other</option> </select>";
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+//        controlUI.addEventListener('click', function() {
+//            map.setCenter(chicago);
+//        });
+
+    }
+
     /**
      * Creates a map object with a click listener and a heatmap.
      */
@@ -74,6 +104,12 @@
             disableDoubleClickZoom: true,
             streetViewControl: false,
         });
+
+        var centerControlDiv = document.createElement('div');
+        var centerControl = new CenterControl(centerControlDiv, map);
+
+        centerControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
 
 
 
@@ -93,12 +129,18 @@
                 // Add the point to  the heatmap.
                 var pushed = false;
                 for (var i = 0; i < activityList.length; i++) {
-                    if (data.name === activityList[i]) {
+                    if (data.type === activityList[i]) {
                         var marker = new google.maps.Marker({
                             position: data,
                             map: map,
-                            icon: "../Assets/" + data.name + ".png",
-                            label: data.name
+                            icon: "../Assets/" + data.type + ".png",
+
+                        });
+                        infowindow = new google.maps.InfoWindow({
+                            content: data.name + "\n" + data.when + "\n<input type='button' value='presentData' onclick='close()'/>"
+                        });
+                        google.maps.event.addListener(marker, 'click', function() {
+                            infoWindow.open(map, marker);
                         });
                         markers.push(marker);
                         pushed = true;
@@ -110,7 +152,12 @@
                         position: data,
                         map: map,
                         icon: '../Assets/satan.jpg',
-                        label: data.name
+                    });
+                    var infoWindowSet = new google.maps.InfoWindow({
+                        content: data.name + "\n" + data.when + "\n<input type='button' value='presentData' onclick='close()'/>"
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        infoWindowSet.open(map, marker);
                     });
                     markers.push(marker);
                 }
@@ -155,37 +202,53 @@
         map.addListener('click', function(e) {
             data.lat = e.latLng.lat();
             data.lng = e.latLng.lng();
-            var promptName = prompt('Enter name of activity:');
-            if (promptName == null) {
-                return;
-            }
-            data.name = promptName;
-            addToFirebase(data);
+            infowindow = new google.maps.InfoWindow({
+                content: "<table> <tr><td>Name:</td> <td><input type='text' id='name'/>"
+                + "</td> </tr> <tr><td>When:</td> <td><input type='text' id='when'/>"
+                + "</td> </tr> <tr><td>Type:</td> <td><select id='type'>"
+                + "<option value='soccer' SELECTED>Soccer</option>"
+                + "<option value='basketball'>Basketball</option>"
+                + "<option value='football'>Football</option>"
+                + "<option value='frisbee'>Frisbee</option>"
+                + "<option value='other'>Other</option>"
+                + "</select> </td></tr> <tr><td></td>"
+                + "<td><input type='button' value='Make Event!' onclick='saveData(data)'/></td></tr> </table>"
+            });
+            var marker = new google.maps.Marker({
+                position: data,
+                map: map
+            });
+            infowindow.open(map, marker);
+            //addToFirebase(data);
             var pushed = false;
             for (var i = 0; i < activityList.length; i++) {
-                if (data.name === activityList[i]) {
-                    var marker = new google.maps.Marker({
-                        position: data,
-                        map: map,
-                        icon: "../Assets/" + data.name + ".png",
-                        label: data.name
-                    });
+                if (data.type === activityList[i]) {
+                    marker.setIcon("../Assets/" + data.type + ".png");
                     markers.push(marker);
                     pushed = true;
+                    break;
                 }
             }
 
             if (pushed === false) {
-                var marker = new google.maps.Marker({
-                    position: data,
-                    map: map,
-                    icon: '../Assets/satan.jpg',
-                    label: data.name
-                });
+                marker.setIcon("../Assets/satan.png");
                 markers.push(marker);
             }
         });
 
+    }
+
+    function saveData(stuff) {
+        stuff.name = document.getElementById("name").value;
+        stuff.when = document.getElementById("when").value;
+        stuff.type = document.getElementById("type").value;
+        console.log("name", document.getElementById("name").value)
+        addToFirebase(stuff)
+        close();
+    }
+
+    function close() {
+        infowindow.close();
     }
 
     /**

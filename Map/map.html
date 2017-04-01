@@ -232,9 +232,11 @@
     }
 
     filterMarkers = function (category) {
-        for (i = 0; i < markers.length; i++) {
+        for (var i = 0; i < markers.length; i++) {
             marker = markers[i];
-            if (marker.label == category || category == "all") {
+            var typeString = marker.getIcon();
+            typeString = typeString.substring(10, typeString.length - 4);
+            if (typeString === category || category === "all") {
                 marker.setVisible(true);
             } else {
                 marker.setVisible(false);

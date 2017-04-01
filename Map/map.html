@@ -25,7 +25,6 @@
      * @const
      */
     var firebase = new Firebase('https://yoursports-633ea.firebaseio.com/');
-
     /**
      * Data object to be written to Firebase.
      */
@@ -35,12 +34,9 @@
         lat: null,
         lng: null
     };
-
     markers = [];
-
     var activityList = ["soccer", "basketball", "football", "frisbee"];
     var infowindow;
-
     /**
      * Starting point for running the program. Authenticates the user.
      * @param {function()} onAuthSuccess - Called when authentication succeeds.
@@ -55,9 +51,7 @@
             }
         }, {remember: 'sessionOnly'});  // Users will get a new id for every session.
     }
-
     function CenterControl(controlDiv, map) {
-
         // Set CSS for the control border.
         var controlUI = document.createElement('div');
         controlUI.style.backgroundColor = '#fff';
@@ -69,7 +63,6 @@
         controlUI.style.textAlign = 'center';
         controlUI.title = 'Click to recenter the map';
         controlDiv.appendChild(controlUI);
-
         // Set CSS for the control interior.
         var controlText = document.createElement('div');
         controlText.style.color = 'rgb(25,25,25)';
@@ -86,14 +79,11 @@
             + "<option value=\"frisbee\">frisbee</option>"
             + "<option value=\"other\">other</option> </select>";
         controlUI.appendChild(controlText);
-
         // Setup the click event listeners: simply set the map to Chicago.
 //        controlUI.addEventListener('click', function() {
 //            map.setCenter(chicago);
 //        });
-
     }
-
     /**
      * Creates a map object with a click listener and a heatmap.
      */
@@ -112,25 +102,18 @@
 
         var centerControlDiv = document.createElement('div');
         var centerControl = new CenterControl(centerControlDiv, map);
-
         centerControlDiv.index = 1;
         map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
-
-
-
         // 10 minutes before current time.
         var startTime = new Date().getTime() - (60 * 10 * 1000);
-
         var clicks = firebase.child('clicks');
         // Listener for when a click is added.
         clicks.orderByChild('timestamp').startAt(startTime).on('child_added',
             function(snapshot) {
-
                 // Get that click from firebase.
                 var data = snapshot.val();
                 var point = new google.maps.LatLng(data.lat, data.lng);
                 var elapsed = new Date().getTime() - data.timestamp;
-
                 // Add the point to  the heatmap.
                 var pushed = false;
                 for (var i = 0; i < activityList.length; i++) {
@@ -139,7 +122,6 @@
                             position: data,
                             map: map,
                             icon: "../Assets/" + data.type + ".png",
-
                         });
                         infowindow = new google.maps.InfoWindow({
                             content: "<p>" + data.name + "<br>" + data.when + "</p>"
@@ -156,7 +138,6 @@
                         pushed = true;
                     }
                 }
-
                 if (pushed === false) {
                     var marker = new google.maps.Marker({
                         position: data,
@@ -176,7 +157,6 @@
                     });
                     markers.push(marker);
                 }
-
                 // Requests entries older than expiry time (10 minutes).
                 var expirySeconds = Math.max(60 * 10 * 1000 - elapsed, 0);
                 // Set client timeout to remove the point after a certain time.
@@ -186,7 +166,6 @@
                 }, expirySeconds);
             }
         );
-
         var pos = {
             lat: 33.756320,
             lng: -84.389119
@@ -221,7 +200,6 @@
 //            // Browser doesn't support Geolocation
 //            handleLocationError(false, infoWindow, map.getCenter());
 //        }
-
         // Listen for clicks and add the location of the click to firebase.
         map.addListener('click', function(e) {
             data.lat = e.latLng.lat();
@@ -240,7 +218,7 @@
             });
             var marker = new google.maps.Marker({
                 position: data,
-                map: map
+                map: map,
             });
             infowindow.open(map, marker);
             //addToFirebase(data);
@@ -253,15 +231,13 @@
                     break;
                 }
             }
-
             if (pushed === false) {
                 marker.setIcon("../Assets/satan.png");
                 markers.push(marker);
             }
+            google.maps.event.trigger(map, 'resize');
         });
-
     }
-
     function saveData(stuff) {
         stuff.name = document.getElementById("name").value;
         stuff.when = document.getElementById("when").value;
@@ -270,7 +246,6 @@
         addToFirebase(stuff)
         close();
     }
-
     function close() {
         infowindow.close();
     }
@@ -298,9 +273,7 @@
     function getTimestamp(addClick) {
         // Reference to location for saving the last click time.
         var ref = firebase.child('last_message/' + data.sender);
-
         ref.onDisconnect().remove();  // Delete reference from firebase on disconnect.
-
         // Set value to timestamp.
         ref.set(Firebase.ServerValue.TIMESTAMP, function(err) {
             if (err) {  // Write to last message was unsuccessful.
@@ -314,7 +287,6 @@
             }
         });
     }
-
     /**
      * Adds a click to firebase.
      * @param {Object} data The data to be added to firebase.
@@ -331,7 +303,6 @@
             });
         });
     }
-
     filterMarkers = function (category) {
         for (var i = 0; i < markers.length; i++) {
             marker = markers[i];
@@ -347,7 +318,6 @@
             }
         }
     }
-
 </script>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8sf09YBo8p73yk5SI93Es34KRoossAhg&libraries=visualization&callback=initMap">

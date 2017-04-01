@@ -153,11 +153,11 @@
                         map: map,
                         icon: '../Assets/satan.jpg',
                     });
-                    var infoWindowSet = new google.maps.InfoWindow({
-                        content: data.name + "\n" + data.when + "\n<input type='button' value='presentData' onclick='close()'/>"
+                    var infowindow = new google.maps.InfoWindow({
+                        content: "<p>" + data.name + "<br>" + data.when + "</p>"
                     });
                     google.maps.event.addListener(marker, 'click', function() {
-                        infoWindowSet.open(map, marker);
+                        infowindow.open(map, marker);
                     });
                     markers.push(marker);
                 }
@@ -226,10 +226,6 @@
             var marker = new google.maps.Marker({
                 position: data,
                 map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 0
-                }
             });
             infowindow.open(map, marker);
             //addToFirebase(data);
@@ -247,6 +243,7 @@
                 marker.setIcon("../Assets/satan.png");
                 markers.push(marker);
             }
+            google.maps.event.trigger(map, 'resize');
         });
 
     }

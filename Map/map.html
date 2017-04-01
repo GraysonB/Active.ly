@@ -172,31 +172,40 @@
             }
         );
 
-
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-
-                //infoWindow.setPosition(pos);
-                //infoWindow.setContent('Location found.');
-                map.setCenter(pos);
-                var marker = new google.maps.Marker({
-                    position: pos,
-                    icon: '../Assets/person.png',
-                    map: map,
-                    title: 'You are Here!'
-                });
-            }, function() {
-                handleLocationError(true, infoWindow, map.getCenter());
-            });
-        } else {
-            // Browser doesn't support Geolocation
-            handleLocationError(false, infoWindow, map.getCenter());
-        }
+        var pos = {
+            lat: 33.756320,
+            lng: -84.389119
+        };
+        map.setCenter(pos);
+        var marker = new google.maps.Marker({
+            position: pos,
+            icon: '../Assets/person.png',
+            map: map,
+            title: 'You are Here!'
+        });
+//        if (navigator.geolocation) {
+//            navigator.geolocation.getCurrentPosition(function(position) {
+//                var pos = {
+//                    lat: position.coords.latitude,
+//                    lng: position.coords.longitude
+//                };
+//
+//                //infoWindow.setPosition(pos);
+//                //infoWindow.setContent('Location found.');
+//                map.setCenter(pos);
+//                var marker = new google.maps.Marker({
+//                    position: pos,
+//                    icon: '../Assets/person.png',
+//                    map: map,
+//                    title: 'You are Here!'
+//                });
+//            }, function() {
+//                handleLocationError(true, infoWindow, map.getCenter());
+//            });
+//        } else {
+//            // Browser doesn't support Geolocation
+//            handleLocationError(false, infoWindow, map.getCenter());
+//        }
 
         // Listen for clicks and add the location of the click to firebase.
         map.addListener('click', function(e) {

@@ -137,10 +137,10 @@
 
                         });
                         infowindow = new google.maps.InfoWindow({
-                            content: data.name + "\n" + data.when + "\n<input type='button' value='presentData' onclick='close()'/>"
+                            content: "<p>" + data.name + "<br>" + data.when + "</p>"
                         });
                         google.maps.event.addListener(marker, 'click', function() {
-                            infoWindow.open(map, marker);
+                            infowindow.open(map, marker);
                         });
                         markers.push(marker);
                         pushed = true;
